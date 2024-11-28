@@ -1,13 +1,67 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# OSX
+.DS_Store
 
-# dependencies
+# Xcode
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.xcuserstate
+
+# Android/IntelliJ
+build/
+.idea
+.gradle
+local.properties
+*.iml
+*.hprof
+
+# node.js
 node_modules/
+npm-debug.log
+yarn-error.log
+
+# Bundle artifact
+*.jsbundle
+
+# Ruby / CocoaPods
+/ios/Pods/
+/vendor/bundle/
 
 # Expo
 .expo/
 dist/
 web-build/
+stats.json
 expo-env.d.ts
+
+# VSCode
+.vscode
+
+# gitignore and github actions
+!.gitignore
+!.github
+
+# Android & iOS folders
+/android/
+/ios/
+
+# environment variables
+.env
+.env.*
+
+# Firebase (Android) Google services
+google-services.json
 
 # Native
 *.orig.*
@@ -25,12 +79,17 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
-.DS_Store
-*.pem
+# ESLint
+.eslintcache
 
-# local env files
-.env*.local
+# i18n
+src/locale/locales/_build/
+src/locale/locales/**/*.js
+
+# local builds
+*.apk
+*.aab
+*.ipa
 
 # typescript
 *.tsbuildinfo

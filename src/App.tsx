@@ -1,7 +1,5 @@
-import { useState } from 'react';
 import {
   Image,
-  LayoutChangeEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -10,19 +8,16 @@ import {
   View,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, {
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated';
 import {
   initialWindowMetrics,
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
-import { BlurView } from 'expo-blur';
 import { StatusBar } from 'expo-status-bar';
+// import I18nProvider from '@/locale/I18nProvider';
+import { i18n } from '@lingui/core';
+import { Trans } from '@lingui/macro';
+import { I18nProvider } from '@lingui/react';
 
 import { RoutesContainer } from './navigation';
 
@@ -139,13 +134,17 @@ const thoughtsyFeed = [
   },
 ];
 
+// i18n.loadAndActivate({ locale: 'en', messages: {} });
+i18n.loadAndActivate({ locale: 'es', messages: {} });
 export default function App() {
   return (
-    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-      <GestureHandlerRootView style={{ height: '100%' }}>
-        <Shell />
-      </GestureHandlerRootView>
-    </SafeAreaProvider>
+    <I18nProvider i18n={i18n}>
+      <SafeAreaProvider initialMetrics={initialWindowMetrics}>
+        <GestureHandlerRootView style={{ height: '100%' }}>
+          <Shell />
+        </GestureHandlerRootView>
+      </SafeAreaProvider>
+    </I18nProvider>
   );
 }
 
@@ -179,310 +178,267 @@ const ShellContainer = () => {
 
 const Test = () => {
   const insets = useSafeAreaInsets();
-  const scrollY = useSharedValue(0);
-  const [headerHeight, setHeaderHeight] = useState(0);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: event => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  const headerMounted = (event: LayoutChangeEvent) => {
-    const { height } = event.nativeEvent.layout;
-    setHeaderHeight(height);
-  };
-
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(scrollY.value, [0, 100], [0, 1], 'clamp');
-    return {
-      opacity,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: opacity * 0.4,
-      shadowRadius: 8,
-      elevation: opacity * 5,
-    };
-  });
-
-  const textAnimatedStyle = useAnimatedStyle(() => {
-    const colorOpacity = interpolate(scrollY.value, [0, 100], [0, 1], 'clamp');
-    return {
-      color: colorOpacity >= 1 ? 'white' : '#000',
-    };
-  });
-
-  const subtitleAnimatedStyle = useAnimatedStyle(() => {
-    const colorOpacity = interpolate(scrollY.value, [0, 100], [0, 1], 'clamp');
-    return {
-      color: colorOpacity >= 1 ? '#ffffff99' : '#aaa',
-    };
-  });
 
   return (
-    <View style={{ flex: 1 }}>
-      {/* Header */}
+    <ScrollView
+      style={{ flex: 1 }}
+      contentContainerStyle={{
+        paddingTop: insets.top,
+        paddingBottom: insets.bottom,
+        gap: 24,
+      }}
+    >
+      <StatusBar style="dark" animated hidden />
       <View
         style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          paddingTop: insets.top + 16,
-          paddingBottom: 16,
-          zIndex: 1,
+          backgroundColor: 'white',
         }}
-        onLayout={headerMounted}
       >
-        <Animated.View style={[StyleSheet.absoluteFill, headerAnimatedStyle]}>
-          <BlurView
-            intensity={500}
-            tint="dark"
-            style={StyleSheet.absoluteFill}
-          />
-        </Animated.View>
         <View style={[{ gap: 8, paddingLeft: 18 }]}>
-          <Animated.Text style={[{ fontSize: 24 }, subtitleAnimatedStyle]}>
-            Hello,
-          </Animated.Text>
-          <Animated.Text
-            style={[{ fontSize: 32, fontWeight: 500 }, textAnimatedStyle]}
-          >
+          <Text style={{ fontSize: 24, color: '#666' }}>
+            <Trans>Hello,</Trans>
+          </Text>
+          <Text style={{ fontSize: 32, fontWeight: '500', color: '#000' }}>
             Ryan George
-          </Animated.Text>
+          </Text>
         </View>
       </View>
 
-      <Animated.ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          gap: 24,
-          paddingTop: headerHeight || insets.top + 90,
-          paddingBottom: insets.bottom,
-        }}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-      >
-        {/* Thoughtsy Coming Section */}
-        <View style={{ gap: 8, paddingLeft: 18 }}>
-          <Text style={{ fontSize: 14, marginBottom: 16 }}>
-            A Thoughtsy is coming to you...{' '}
-            <Text style={{ color: '#FF6B00' }}>1</Text>
-          </Text>
+      <View style={{ gap: 8, paddingLeft: 18 }}>
+        <Text style={{ fontSize: 14, marginBottom: 16 }}>
+          A Thoughtsy is coming to you...{' '}
+          <Text style={{ color: '#FF6B00' }}>1</Text>
+        </Text>
 
-          {/* Notification Card */}
-          <View
+        {/* Notification Card */}
+        <View
+          style={{
+            backgroundColor: '#f6f0e2',
+            marginRight: 18,
+            borderRadius: 16,
+            padding: 16,
+          }}
+        >
+          <Text
             style={{
-              backgroundColor: '#f6f0e2',
-              padding: 20,
-              borderRadius: 12,
-              marginRight: 18,
+              fontSize: 18,
+              fontWeight: 'bold',
+              marginBottom: 8,
+            }}
+            numberOfLines={1}
+          >
+            Thoughts
+          </Text>
+          <Text style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
+            Keep your eyes on our alerts
+          </Text>
+          <TouchableOpacity
+            accessibilityRole="button"
+            style={{
+              backgroundColor: 'black',
+              paddingVertical: 12,
+              paddingHorizontal: 24,
+              borderRadius: 24,
+              alignSelf: 'flex-start',
             }}
           >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: 'bold',
-                marginBottom: 8,
-              }}
-              numberOfLines={1}
-            >
-              Thoughtsy is coming to you
-            </Text>
-            <Text style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-              Keep your eyes on our alerts
-            </Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              style={{
-                backgroundColor: 'black',
-                paddingVertical: 12,
-                paddingHorizontal: 24,
-                borderRadius: 24,
-                alignSelf: 'flex-start',
-              }}
-            >
-              <Text style={{ color: 'white', fontSize: 14 }}>Add Wishlist</Text>
-            </TouchableOpacity>
-          </View>
+            <Text style={{ color: 'white', fontSize: 14 }}>Add Wishlist</Text>
+          </TouchableOpacity>
         </View>
+      </View>
 
-        {/* Upcoming Events Section */}
-        <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 14, marginBottom: 16, paddingLeft: 18 }}>
-            Upcoming Events
-          </Text>
+      {/* Upcoming Events Section */}
+      <View style={{ gap: 8 }}>
+        <Text style={{ fontSize: 14, marginBottom: 16, paddingLeft: 18 }}>
+          Upcoming Events
+        </Text>
 
-          {/* Event Card */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 16, marginLeft: 18 }}
-          >
-            {upcomingEvents.map(event => (
+        {/* Event Card */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            marginHorizontal: 18,
+          }}
+        >
+          {upcomingEvents.map(event => (
+            <View
+              key={event.id}
+              style={{
+                backgroundColor: event.backgroundColor,
+                padding: 16,
+                width: 300,
+                marginRight: 16,
+                borderRadius: 16,
+              }}
+            >
               <View
-                key={event.id}
                 style={{
-                  backgroundColor: event.backgroundColor,
-                  padding: 16,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 16,
+                }}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontWeight: '500',
+                      marginBottom: 4,
+                    }}
+                  >
+                    {event.title}
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>
+                    {event.date}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 'bold',
+                    marginLeft: 8,
+                  }}
+                >
+                  {event.daysToGo}
+                </Text>
+              </View>
+              <Text style={{ fontSize: 14 }}>{event.location}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
+
+      {/* Upcoming Occasions Section */}
+      <View style={{ gap: 8 }}>
+        <Text style={{ fontSize: 16, paddingLeft: 18 }}>
+          Upcoming Occasions
+        </Text>
+
+        {/* Occasions Cards Container */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{
+            marginHorizontal: 18,
+          }}
+        >
+          {upcomingOccasions.map(occasion => (
+            <View
+              key={occasion.id}
+              style={{
+                backgroundColor: '#F6F4FF',
+                padding: 16,
+                width: 192,
+                height: 149,
+                marginRight: 16,
+                borderRadius: 16,
+              }}
+            >
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  backgroundColor: 'white',
+                  marginBottom: 16,
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   borderRadius: 12,
                 }}
               >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    gap: 32,
-                    marginBottom: 16,
-                  }}
-                >
-                  <View>
-                    <Text style={{ fontSize: 16, marginBottom: 4 }}>
-                      {event.title}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#666' }}>
-                      {event.date}
-                    </Text>
-                  </View>
-                  <Text
-                    style={{
-                      marginLeft: 'auto',
-                      fontSize: 14,
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    {event.daysToGo}
-                  </Text>
-                </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 14 }}>{event.location}</Text>
-                </View>
+                <Text>{occasion.emoji}</Text>
               </View>
-            ))}
-          </ScrollView>
-        </View>
+              <Text style={{ fontSize: 16, marginBottom: 8 }} numberOfLines={1}>
+                {occasion.title}
+              </Text>
+              <Text style={{ fontSize: 12, color: '#666' }}>
+                {occasion.date}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </View>
 
-        {/* Upcoming Occasions Section */}
-        <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 16, paddingLeft: 18 }}>
-            Upcoming Occasions
-          </Text>
-
-          {/* Occasions Cards Container */}
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ gap: 16, marginLeft: 18 }}
-          >
-            {upcomingOccasions.map(occasion => (
+      {/* Thoughtsy Feed Section */}
+      <View style={{ gap: 8 }}>
+        <Text style={{ fontSize: 16, paddingLeft: 18 }}>Thoughtsy Feed</Text>
+        <View style={{ flex: 1 }}>
+          {thoughtsyFeed.map(item => (
+            <View
+              key={item.id}
+              style={{
+                backgroundColor: 'white',
+                padding: 16,
+                width: '100%',
+              }}
+            >
               <View
-                key={occasion.id}
                 style={{
-                  backgroundColor: '#F6F4FF',
-                  padding: 16,
-                  borderRadius: 12,
-                  width: 192,
-                  height: 149,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 12,
                 }}
               >
                 <View
                   style={{
                     width: 40,
                     height: 40,
-                    backgroundColor: 'white',
-                    borderRadius: 20,
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: 16,
-                  }}
-                >
-                  <Text>{occasion.emoji}</Text>
-                </View>
-                <Text
-                  style={{ fontSize: 16, marginBottom: 8 }}
-                  numberOfLines={1}
-                >
-                  {occasion.title}
-                </Text>
-                <Text style={{ fontSize: 12, color: '#666' }}>
-                  {occasion.date}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Thoughtsy Feed Section */}
-        <View style={{ gap: 8 }}>
-          <Text style={{ fontSize: 16, paddingLeft: 18 }}>Thoughtsy Feed</Text>
-          <View style={{ flex: 1, gap: 16 }}>
-            {thoughtsyFeed.map(item => (
-              <Pressable
-                accessibilityRole="button"
-                key={item.id}
-                style={({ pressed }) => [
-                  {
-                    backgroundColor: 'white',
+                    marginRight: 12,
                     borderRadius: 12,
-                    padding: 16,
-                    opacity: pressed ? 0.9 : 1,
-                  },
-                ]}
-                onPress={() => {}}
-              >
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 12,
+                    overflow: 'hidden',
                   }}
                 >
                   <Image
                     source={{ uri: item.avatar }}
                     accessibilityIgnoresInvertColors
-                    style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      marginRight: 12,
-                    }}
+                    style={{ width: '100%', height: '100%' }}
                   />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ fontSize: 16, fontWeight: '500' }}>
-                      {item.author}
-                    </Text>
-                    <Text style={{ fontSize: 14, color: '#666' }}>
-                      {item.timeAgo}
-                    </Text>
-                  </View>
-                  <Pressable
-                    accessibilityRole="button"
-                    onPress={() => {}}
-                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-                  >
-                    <Text style={{ fontSize: 20 }}>⋯</Text>
-                  </Pressable>
                 </View>
-                <Text style={{ fontSize: 14, marginBottom: 12 }}>
-                  {item.content}
-                </Text>
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  {item.images.map((image, index) => (
+                <View style={{ flex: 1 }}>
+                  <Text style={{ fontSize: 16, fontWeight: '500' }}>
+                    {item.author}
+                  </Text>
+                  <Text style={{ fontSize: 14, color: '#666' }}>
+                    {item.timeAgo}
+                  </Text>
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {}}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                >
+                  <Text style={{ fontSize: 20 }}>⋯</Text>
+                </Pressable>
+              </View>
+              <Text style={{ fontSize: 14, marginBottom: 12 }}>
+                {item.content}
+              </Text>
+              <View style={{ flexDirection: 'row', gap: 8 }}>
+                {item.images.map((image, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      flex: 1,
+                      aspectRatio: 1,
+                      borderRadius: 12,
+                      overflow: 'hidden',
+                    }}
+                  >
                     <Image
-                      key={index}
                       source={{ uri: image }}
                       accessibilityIgnoresInvertColors
-                      style={{ flex: 1, aspectRatio: 1, borderRadius: 8 }}
+                      style={{ width: '100%', height: '100%' }}
                       resizeMode="cover"
                     />
-                  ))}
-                </View>
-              </Pressable>
-            ))}
-          </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
         </View>
-      </Animated.ScrollView>
-    </View>
+      </View>
+    </ScrollView>
   );
 };
 

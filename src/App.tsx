@@ -2,23 +2,28 @@ import {
   Image,
   Pressable,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import {
   initialWindowMetrics,
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
-// import I18nProvider from '@/locale/I18nProvider';
 import { i18n } from '@lingui/core';
 import { Trans } from '@lingui/macro';
 import { I18nProvider } from '@lingui/react';
 
+import messages from './locale/locales/ca/messages';
 import { RoutesContainer } from './navigation';
 
 // Add these data arrays at the top of the file, outside of components
@@ -134,13 +139,25 @@ const thoughtsyFeed = [
   },
 ];
 
-// i18n.loadAndActivate({ locale: 'en', messages: {} });
-i18n.loadAndActivate({ locale: 'es', messages: {} });
+// i18n.loadAndActivate({
+//   locale: 'ja',
+//   messages: messagesJa,
+// });
+
+i18n.loadAndActivate({
+  locale: 'en',
+  messages,
+});
+
 export default function App() {
   return (
     <I18nProvider i18n={i18n}>
       <SafeAreaProvider initialMetrics={initialWindowMetrics}>
-        <GestureHandlerRootView style={{ height: '100%' }}>
+        <GestureHandlerRootView
+          style={{
+            flex: 1,
+          }}
+        >
           <Shell />
         </GestureHandlerRootView>
       </SafeAreaProvider>
@@ -150,24 +167,20 @@ export default function App() {
 
 const Shell = () => {
   return (
-    <View style={{ flex: 1 }}>
-      <StatusBar style={'dark'} animated />
+    <>
       <RoutesContainer>
         <ShellContainer />
       </RoutesContainer>
-    </View>
+    </>
   );
 };
 
 const ShellContainer = () => {
   return (
     <>
-      <View style={{ flex: 1 }}>
-        <View style={styles.container}>
-          <Test />
-        </View>
-        {/* <TabsNavigator /> */}
-      </View>
+      <Test />
+
+      {/* <TabsNavigator /> */}
 
       {/* Modal Outlet */}
       {/* Portal Outlet */}
@@ -178,273 +191,321 @@ const ShellContainer = () => {
 
 const Test = () => {
   const insets = useSafeAreaInsets();
+  const scrollY = useSharedValue(0);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: event => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateY: withSpring(Math.min(scrollY.value * 0.1, 20), {
+          damping: 20,
+          stiffness: 90,
+        }),
+      },
+    ],
+    opacity: withSpring(1, {
+      damping: 20,
+      stiffness: 90,
+    }),
+  }));
 
   return (
-    <ScrollView
-      style={{ flex: 1 }}
-      contentContainerStyle={{
-        paddingTop: insets.top,
-        paddingBottom: insets.bottom,
-        gap: 24,
-      }}
-    >
-      <StatusBar style="dark" animated hidden />
-      <View
+    <>
+      <StatusBar style="dark" animated />
+      <Animated.ScrollView
+        onScroll={scrollHandler}
+        scrollEventThrottle={16}
         style={{
-          backgroundColor: 'white',
+          flex: 1,
+          marginTop: insets.top,
+        }}
+        contentContainerStyle={{
+          gap: 24,
+          paddingHorizontal: 18,
+          paddingBottom: insets.bottom * 2,
         }}
       >
-        <View style={[{ gap: 8, paddingLeft: 18 }]}>
-          <Text style={{ fontSize: 24, color: '#666' }}>
-            <Trans>Hello,</Trans>
-          </Text>
-          <Text style={{ fontSize: 32, fontWeight: '500', color: '#000' }}>
-            Ryan George
-          </Text>
+        <View>
+          <View style={[{ gap: 8 }]}>
+            <Text style={{ fontSize: 24, color: '#666' }}>
+              <Trans>Hello,</Trans>
+            </Text>
+            <Text style={{ fontSize: 32, fontWeight: '500', color: '#000' }}>
+              Ryan George
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <View style={{ gap: 8, paddingLeft: 18 }}>
-        <Text style={{ fontSize: 14, marginBottom: 16 }}>
-          A Thoughtsy is coming to you...{' '}
-          <Text style={{ color: '#FF6B00' }}>1</Text>
-        </Text>
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 14, marginBottom: 16 }}>
+            A Thoughtsy is coming to you...{' '}
+            <Text style={{ color: '#FF6B00' }}>1</Text>
+          </Text>
 
-        {/* Notification Card */}
-        <View
-          style={{
-            backgroundColor: '#f6f0e2',
-            marginRight: 18,
-            borderRadius: 16,
-            padding: 16,
-          }}
-        >
-          <Text
+          {/* Notification Card */}
+          <View
             style={{
-              fontSize: 18,
-              fontWeight: 'bold',
-              marginBottom: 8,
-            }}
-            numberOfLines={1}
-          >
-            Thoughts
-          </Text>
-          <Text style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
-            Keep your eyes on our alerts
-          </Text>
-          <TouchableOpacity
-            accessibilityRole="button"
-            style={{
-              backgroundColor: 'black',
-              paddingVertical: 12,
-              paddingHorizontal: 24,
-              borderRadius: 24,
-              alignSelf: 'flex-start',
+              backgroundColor: '#f6f0e2',
+              marginRight: 18,
+              borderRadius: 16,
+              padding: 16,
             }}
           >
-            <Text style={{ color: 'white', fontSize: 14 }}>Add Wishlist</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* Upcoming Events Section */}
-      <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 14, marginBottom: 16, paddingLeft: 18 }}>
-          Upcoming Events
-        </Text>
-
-        {/* Event Card */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            marginHorizontal: 18,
-          }}
-        >
-          {upcomingEvents.map(event => (
-            <View
-              key={event.id}
+            <Text
               style={{
-                backgroundColor: event.backgroundColor,
-                padding: 16,
-                width: 300,
-                marginRight: 16,
-                borderRadius: 16,
+                fontSize: 18,
+                fontWeight: 'bold',
+                marginBottom: 8,
+              }}
+              numberOfLines={1}
+            >
+              Thoughts
+            </Text>
+            <Text style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>
+              Keep your eyes on our alerts
+            </Text>
+            <TouchableOpacity
+              accessibilityRole="button"
+              style={{
+                backgroundColor: 'black',
+                paddingVertical: 12,
+                paddingHorizontal: 24,
+                borderRadius: 24,
+                alignSelf: 'flex-start',
               }}
             >
-              <View
+              <Text style={{ color: 'white', fontSize: 14 }}>Add Wishlist</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Upcoming Events Section */}
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 14, marginBottom: 16 }}>
+            <Trans>Upcoming Events</Trans>
+          </Text>
+
+          {/* Event Card */}
+          <ScrollView
+            horizontal
+            style={{
+              marginHorizontal: -18,
+              paddingHorizontal: 18,
+            }}
+            showsHorizontalScrollIndicator={false}
+          >
+            {upcomingEvents.map(event => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={event.id}
                 style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: 16,
+                  backgroundColor: event.backgroundColor,
+                  padding: 16,
+                  width: 300,
+                  marginRight: 16,
+                  borderRadius: 16,
                 }}
               >
-                <View style={{ flex: 1 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: '500',
-                      marginBottom: 4,
-                    }}
-                  >
-                    {event.title}
-                  </Text>
-                  <Text style={{ fontSize: 14, color: '#666' }}>
-                    {event.date}
-                  </Text>
-                </View>
-                <Text
+                <View
                   style={{
-                    fontSize: 14,
-                    fontWeight: 'bold',
-                    marginLeft: 8,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 16,
                   }}
                 >
-                  {event.daysToGo}
-                </Text>
-              </View>
-              <Text style={{ fontSize: 14 }}>{event.location}</Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        fontWeight: '500',
+                        marginBottom: 4,
+                      }}
+                    >
+                      {event.title}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#666' }}>
+                      {event.date}
+                    </Text>
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: 'bold',
+                      marginLeft: 8,
+                    }}
+                  >
+                    {event.daysToGo}
+                  </Text>
+                </View>
+                <Text style={{ fontSize: 14 }}>{event.location}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
 
-      {/* Upcoming Occasions Section */}
-      <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, paddingLeft: 18 }}>
-          Upcoming Occasions
-        </Text>
+        {/* Upcoming Occasions Section */}
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 16 }}>
+            <Trans>Upcoming Occasions</Trans>
+          </Text>
 
-        {/* Occasions Cards Container */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{
-            marginHorizontal: 18,
-          }}
-        >
-          {upcomingOccasions.map(occasion => (
-            <View
-              key={occasion.id}
-              style={{
-                backgroundColor: '#F6F4FF',
-                padding: 16,
-                width: 192,
-                height: 149,
-                marginRight: 16,
-                borderRadius: 16,
-              }}
-            >
-              <View
+          {/* Occasions Cards Container */}
+          <ScrollView
+            horizontal
+            style={{
+              marginHorizontal: -18,
+              paddingHorizontal: 18,
+            }}
+            showsHorizontalScrollIndicator={false}
+          >
+            {upcomingOccasions.map(occasion => (
+              <TouchableOpacity
+                accessibilityRole="button"
+                key={occasion.id}
                 style={{
-                  width: 40,
-                  height: 40,
-                  backgroundColor: 'white',
-                  marginBottom: 16,
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  borderRadius: 12,
-                }}
-              >
-                <Text>{occasion.emoji}</Text>
-              </View>
-              <Text style={{ fontSize: 16, marginBottom: 8 }} numberOfLines={1}>
-                {occasion.title}
-              </Text>
-              <Text style={{ fontSize: 12, color: '#666' }}>
-                {occasion.date}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
-
-      {/* Thoughtsy Feed Section */}
-      <View style={{ gap: 8 }}>
-        <Text style={{ fontSize: 16, paddingLeft: 18 }}>Thoughtsy Feed</Text>
-        <View style={{ flex: 1 }}>
-          {thoughtsyFeed.map(item => (
-            <View
-              key={item.id}
-              style={{
-                backgroundColor: 'white',
-                padding: 16,
-                width: '100%',
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginBottom: 12,
+                  backgroundColor: '#F6F4FF',
+                  padding: 16,
+                  width: 192,
+                  height: 149,
+                  marginRight: 16,
+                  borderRadius: 16,
                 }}
               >
                 <View
                   style={{
                     width: 40,
                     height: 40,
-                    marginRight: 12,
+                    backgroundColor: 'white',
+                    marginBottom: 16,
+                    alignItems: 'center',
+                    justifyContent: 'center',
                     borderRadius: 12,
-                    overflow: 'hidden',
                   }}
                 >
-                  <Image
-                    source={{ uri: item.avatar }}
-                    accessibilityIgnoresInvertColors
-                    style={{ width: '100%', height: '100%' }}
-                  />
+                  <Text>{occasion.emoji}</Text>
                 </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ fontSize: 16, fontWeight: '500' }}>
-                    {item.author}
-                  </Text>
-                  <Text style={{ fontSize: 14, color: '#666' }}>
-                    {item.timeAgo}
-                  </Text>
-                </View>
-                <Pressable
-                  accessibilityRole="button"
-                  onPress={() => {}}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                <Text
+                  style={{ fontSize: 16, marginBottom: 8 }}
+                  numberOfLines={1}
                 >
-                  <Text style={{ fontSize: 20 }}>⋯</Text>
-                </Pressable>
-              </View>
-              <Text style={{ fontSize: 14, marginBottom: 12 }}>
-                {item.content}
-              </Text>
-              <View style={{ flexDirection: 'row', gap: 8 }}>
-                {item.images.map((image, index) => (
+                  {occasion.title}
+                </Text>
+                <Text style={{ fontSize: 12, color: '#666' }}>
+                  {occasion.date}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+
+        {/* Thoughtsy Feed Section */}
+        <View style={{ gap: 8 }}>
+          <Text style={{ fontSize: 16 }}>
+            <Trans>Thoughtsy Feed</Trans>
+          </Text>
+          <ScrollView contentContainerStyle={{ gap: 16 }}>
+            {thoughtsyFeed.map(item => (
+              <View
+                key={item.id}
+                style={{
+                  backgroundColor: 'white',
+                  width: '100%',
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 12,
+                  }}
+                >
                   <View
-                    key={index}
                     style={{
-                      flex: 1,
-                      aspectRatio: 1,
+                      width: 40,
+                      height: 40,
+                      marginRight: 12,
                       borderRadius: 12,
                       overflow: 'hidden',
                     }}
                   >
-                    <Image
-                      source={{ uri: image }}
-                      accessibilityIgnoresInvertColors
-                      style={{ width: '100%', height: '100%' }}
-                      resizeMode="cover"
-                    />
+                    <TouchableOpacity accessibilityRole="button">
+                      <Image
+                        source={{ uri: item.avatar }}
+                        accessibilityIgnoresInvertColors
+                        style={{ width: '100%', height: '100%' }}
+                      />
+                    </TouchableOpacity>
                   </View>
-                ))}
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ fontSize: 16, fontWeight: '500' }}>
+                      {item.author}
+                    </Text>
+                    <Text style={{ fontSize: 14, color: '#666' }}>
+                      {item.timeAgo}
+                    </Text>
+                  </View>
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={() => {}}
+                    style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+                  >
+                    <Text style={{ fontSize: 20 }}>⋯</Text>
+                  </Pressable>
+                </View>
+                <Text style={{ fontSize: 14, marginBottom: 12 }}>
+                  {item.content}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {item.images.map((image, index) => (
+                    <View
+                      key={index}
+                      style={{
+                        flex: 1,
+                        aspectRatio: 1,
+                        borderRadius: 12,
+                        overflow: 'hidden',
+                      }}
+                    >
+                      <TouchableOpacity accessibilityRole="button">
+                        <Image
+                          source={{ uri: image }}
+                          accessibilityIgnoresInvertColors
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode="cover"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          ))}
+            ))}
+          </ScrollView>
         </View>
-      </View>
-    </ScrollView>
+
+        <Animated.View style={[animatedStyle]}>
+          <Text
+            style={{
+              fontSize: 14,
+              color: '#666',
+            }}
+          >
+            Made with <Text style={{ color: '#FF6B6B' }}>♥</Text>
+            {' from India'}
+          </Text>
+        </Animated.View>
+      </Animated.ScrollView>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+// });

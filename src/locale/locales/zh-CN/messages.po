@@ -13,6 +13,18 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/App.tsx:254
+#: src/App.tsx:206
 msgid "Hello,"
-msgstr ""
+msgstr "你好，"
+
+#: src/App.tsx:378
+msgid "Thoughtsy Feed"
+msgstr "Thoughtsy 信息流"
+
+#: src/App.tsx:260
+msgid "Upcoming Events"
+msgstr "即将举行的活动"
+
+#: src/App.tsx:324
+msgid "Upcoming Occasions"
+msgstr "即将到来的场合"

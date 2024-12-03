@@ -13,6 +13,18 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#: src/App.tsx:254
+#: src/App.tsx:206
 msgid "Hello,"
-msgstr ""
+msgstr "안녕하세요,"
+
+#: src/App.tsx:378
+msgid "Thoughtsy Feed"
+msgstr "Thoughtsy 피드"
+
+#: src/App.tsx:260
+msgid "Upcoming Events"
+msgstr "다가오는 이벤트"
+
+#: src/App.tsx:324
+msgid "Upcoming Occasions"
+msgstr "다가오는 행사"
